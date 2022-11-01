@@ -16,7 +16,6 @@
 package io.github.ikstewa.opentelemetry.rxjava3;
 
 import com.google.common.truth.Truth;
-import io.opentelemetry.api.trace.Span;
 import io.reactivex.rxjava3.core.Completable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.util.List;
