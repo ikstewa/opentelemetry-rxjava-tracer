@@ -13,16 +13,20 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 //
-package io.github.ikstewa.opentelemetry;
+package io.github.ikstewa.opentelemetry.rxjava3;
 
-import static org.junit.jupiter.api.Assertions.*;
+public final class RxTracingAssemblyBuilder {
+  private boolean enableSchedulerPropagation = false;
 
-import org.junit.jupiter.api.Test;
+  RxTracingAssemblyBuilder() {}
 
-class LibraryTest {
-  @Test
-  void someLibraryMethodReturnsTrue() {
-    Library classUnderTest = new Library();
-    assertTrue(classUnderTest.someLibraryMethod(), "someLibraryMethod should return 'true'");
+  public RxTracingAssemblyBuilder setEnableSchedulerPropagation(
+      boolean enableSchedulerPropagation) {
+    this.enableSchedulerPropagation = enableSchedulerPropagation;
+    return this;
+  }
+
+  public RxTracingAssembly build() {
+    return new RxTracingAssembly(enableSchedulerPropagation);
   }
 }

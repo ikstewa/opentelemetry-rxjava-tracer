@@ -12,9 +12,20 @@ repositories {
 }
 
 dependencies {
-    api("org.apache.commons:commons-math3:3.6.1")
+    api(platform("org.apache.logging.log4j:log4j-bom:2.19.0"))
+    api(platform("io.opentelemetry:opentelemetry-bom:1.19.0"))
+    api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.19.1-alpha"))
 
-    implementation("com.google.guava:guava:31.0.1-jre")
+    api("io.opentelemetry:opentelemetry-api")
+    api("io.reactivex.rxjava3:rxjava:3.1.5")
+    implementation("com.google.code.findbugs:jsr305:3.0.2")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-rxjava-3.1.1")
+
+    testImplementation("org.apache.logging.log4j:log4j-core")
+    testImplementation("io.opentelemetry:opentelemetry-sdk")
+    testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+    testImplementation("com.google.truth.extensions:truth-java8-extension:1.1.3")
+    testImplementation("com.google.truth:truth:1.1.3")
 }
 
 java {
