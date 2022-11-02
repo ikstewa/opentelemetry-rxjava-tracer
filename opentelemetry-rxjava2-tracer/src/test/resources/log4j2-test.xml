@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<Configuration connectionStatus="INFO">
+    <Appenders>
+        <!-- Async Loggers will auto-flush in batches, so switch off immediateFlush. -->
+        <Console name="STDOUT" target="SYSTEM_OUT">
+            <PatternLayout pattern="|%d{HH:mm:ss.SSS}|%-5p|%30.30c{1.}:  %m%n"/>
+        </Console>
+    </Appenders>
+
+    <Loggers>
+        <Logger name="io.github.ikstewa" level="TRACE" />
+
+        <Root includeLocation="true" Level="INFO">
+            <AppenderRef ref="STDOUT" />
+        </Root>
+    </Loggers>
+
+</Configuration>

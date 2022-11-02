@@ -17,9 +17,9 @@ dependencies {
     api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.19.1-alpha"))
 
     api("io.opentelemetry:opentelemetry-api")
-    api("io.reactivex.rxjava3:rxjava:3.1.5")
+    api("io.reactivex.rxjava2:rxjava:2.2.21")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
-    implementation("io.opentelemetry.instrumentation:opentelemetry-rxjava-3.1.1")
+    implementation("io.opentelemetry.instrumentation:opentelemetry-rxjava-2.0")
 
     testImplementation("org.apache.logging.log4j:log4j-core")
     testImplementation("org.apache.logging.log4j:log4j-slf4j-impl")
