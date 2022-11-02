@@ -11,7 +11,7 @@ RxJava 2: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.
 
 ```groovy
 dependencies {
-    implementation "io.github.ikstewa:opentelemetry-rxjava2-tracer:0.1.0"
+    implementation "io.github.ikstewa:opentelemetry-rxjava2-tracer:«version»"
 }
 ```
 
@@ -21,7 +21,7 @@ RxJava 3: [![Maven Central](https://maven-badges.herokuapp.com/maven-central/io.
 
 ```groovy
 dependencies {
-    implementation "io.github.ikstewa:opentelemetry-rxjava3-tracer:0.1.0"
+    implementation "io.github.ikstewa:opentelemetry-rxjava3-tracer:«version»"
 }
 ```
 
@@ -204,3 +204,8 @@ Flowable tracedFlowable = flowable.compose(RxTracer.traceFlowable(SpanBuilder))
 // Via static methods
 Flowable tracedFlowable = RxTracer.traceFlowable(Flowable, SpanBuilder)
 ```
+# Development
+
+## Publish
+To publish a new release:
+`./gradlew publishToSonatype closeAndReleaseSonatypeStagingRepository`
