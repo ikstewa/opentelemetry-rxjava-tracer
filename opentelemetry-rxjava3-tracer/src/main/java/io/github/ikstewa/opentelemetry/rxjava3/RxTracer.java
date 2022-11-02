@@ -23,6 +23,8 @@ import io.reactivex.rxjava3.core.CompletableSource;
 import io.reactivex.rxjava3.core.CompletableTransformer;
 import io.reactivex.rxjava3.core.MaybeSource;
 import io.reactivex.rxjava3.core.MaybeTransformer;
+import io.reactivex.rxjava3.core.ObservableSource;
+import io.reactivex.rxjava3.core.ObservableTransformer;
 import io.reactivex.rxjava3.core.SingleSource;
 import io.reactivex.rxjava3.core.SingleTransformer;
 
@@ -57,6 +59,14 @@ public final class RxTracer {
 
   public static <T> MaybeTransformer<T, T> traceMaybe(SpanBuilder span) {
     return upstream -> traceMaybe(upstream, span);
+  }
+
+  public static <T> ObservableSource<T> traceObservable(ObservableSource<T> upstream, SpanBuilder span) {
+    return new TracedObservable<>(upstream, span);
+  }
+
+  public static <T> ObservableTransformer<T, T> traceObservable(SpanBuilder span) {
+    return upstream -> traceObservable(upstream, span);
   }
 
   // --------------------------------------------------------------------------------
