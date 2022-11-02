@@ -23,15 +23,17 @@ import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
 import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.Comparator;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 
 abstract class OpenTelemetryTestBase {
 
   protected final InMemorySpanExporter testExporter = InMemorySpanExporter.create();
+  protected final SdkTracerProvider tracerProvider;
   protected final Tracer tracer;
 
   OpenTelemetryTestBase() {
@@ -42,22 +44,23 @@ abstract class OpenTelemetryTestBase {
                     Attributes.of(
                         ResourceAttributes.SERVICE_NAME, this.getClass().getSimpleName())));
 
-    final var tracerProvider =
+    final var tracerBuilder =
         SdkTracerProvider.builder()
             .setResource(resource)
             .addSpanProcessor(SimpleSpanProcessor.create(testExporter));
 
     if (Boolean.parseBoolean(System.getProperty("localJaeger"))) {
-      tracerProvider.addSpanProcessor(
-          SimpleSpanProcessor.create(JaegerThriftSpanExporter.builder().build()));
+      tracerBuilder.addSpanProcessor(
+          BatchSpanProcessor.builder(JaegerThriftSpanExporter.builder().build()).build());
     }
 
-    tracer = tracerProvider.build().get(this.getClass().getCanonicalName());
+    tracerProvider = tracerBuilder.build();
+    tracer = tracerProvider.get(this.getClass().getCanonicalName());
   }
 
-  @BeforeEach
-  void reset_exporter() {
-    testExporter.reset();
+  @AfterEach
+  void flush_exporter() {
+    tracerProvider.close();
   }
 
   public List<SpanData> getSpans() {
