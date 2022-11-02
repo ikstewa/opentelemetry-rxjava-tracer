@@ -103,13 +103,13 @@ class ObservableTest extends RxTracerTestBase {
   void mapNestsTrace() {
     final var span = tracer.spanBuilder("Subscribe");
 
-    Observable.just("before")
+    Observable.just("before1", "before2")
         .compose(RxTracer.traceObservable(tracer.spanBuilder("Step 1")))
         .map(
             a -> {
-              final var mapSpan = tracer.spanBuilder("MapOperation").startSpan();
+              final var mapSpan = tracer.spanBuilder("Map-" + a).startSpan();
               try (final var ignored = mapSpan.makeCurrent()) {
-                return "after";
+                return a.replace("before", "after");
               } finally {
                 mapSpan.end();
               }
@@ -123,7 +123,8 @@ class ObservableTest extends RxTracerTestBase {
         """
                     Subscribe: [status: UNSET, attributes: []]
                       Step 1: [status: UNSET, attributes: []]
-                      MapOperation: [status: UNSET, attributes: []]""";
+                      Map-before1: [status: UNSET, attributes: []]
+                      Map-before2: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -289,8 +290,8 @@ class ObservableTest extends RxTracerTestBase {
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-                    Step 1: [status: UNSET, attributes: []]
-                    Subscribe: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+            Step 1: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
 
     assembly.disable();

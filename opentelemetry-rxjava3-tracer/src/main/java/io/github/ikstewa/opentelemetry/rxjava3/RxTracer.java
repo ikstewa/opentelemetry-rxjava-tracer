@@ -61,7 +61,8 @@ public final class RxTracer {
     return upstream -> traceMaybe(upstream, span);
   }
 
-  public static <T> ObservableSource<T> traceObservable(ObservableSource<T> upstream, SpanBuilder span) {
+  public static <T> ObservableSource<T> traceObservable(
+      ObservableSource<T> upstream, SpanBuilder span) {
     return new TracedObservable<>(upstream, span);
   }
 

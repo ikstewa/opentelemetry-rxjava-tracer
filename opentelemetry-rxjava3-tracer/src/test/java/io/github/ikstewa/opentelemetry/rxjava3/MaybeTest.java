@@ -307,8 +307,8 @@ class MaybeTest extends RxTracerTestBase {
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-            Step 1: [status: UNSET, attributes: []]
-            Subscribe: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+            Step 1: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
 
     assembly.disable();
