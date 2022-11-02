@@ -22,8 +22,15 @@ dependencies {
     implementation("io.opentelemetry.instrumentation:opentelemetry-rxjava-3.1.1")
 
     testImplementation("org.apache.logging.log4j:log4j-core")
+    testImplementation("org.apache.logging.log4j:log4j-slf4j-impl")
+    testImplementation("org.apache.logging.log4j:log4j-slf4j2-impl")
+    testImplementation("org.apache.logging.log4j:log4j-jcl")
+    testImplementation("org.apache.logging.log4j:log4j-jpl")
+    testImplementation("org.apache.logging.log4j:log4j-jul")
+
     testImplementation("io.opentelemetry:opentelemetry-sdk")
     testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
+    testImplementation("io.opentelemetry:opentelemetry-exporter-jaeger-thrift")
     testImplementation("com.google.truth.extensions:truth-java8-extension:1.1.3")
     testImplementation("com.google.truth:truth:1.1.3")
 }
