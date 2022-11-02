@@ -68,11 +68,6 @@ class MyClass {
     } finally {
       subscribe.end();
     }
-    // TODO: Add Jaeger trace screenshot
-    // This will trace as:
-    // - Subscribe
-    // -   Execute 1
-    // -   Execute 2
   }
 }
 ```
@@ -94,14 +89,11 @@ class MyClass {
     Completable.concatArray(operation1, operation2)
         .compose(RxTracer.traceCompletable(tracer.spanBuilder("Subscribe")))
         .subscribe();
-    // TODO: Add Jaeger trace screenshot
-    // This will trace as:
-    // - Subscribe
-    // -   Execute 1
-    // -   Execute 2
   }
 }
 ```
+<img width="1192" alt="image" src="https://user-images.githubusercontent.com/990120/199363827-045f57d7-2a67-4f73-82ed-8f92bd81ddef.png">
+
 
 ## Scheduler Support
 The default TracingAssembly support does not handle propagation through
@@ -138,15 +130,19 @@ The RxTracer can be configured to propagate the context across schedulers as
 well so the 'LongRunningOperation' Span will have the 'Subscribe' span as the
 parent.
 
+
+
 ```Java
 RxTracingAssembly.builder().setEnableSchedulerPropagation(true).build().enable();
 ```
 
 ### Without Scheduler supprt
-TODO: Add Jaeger pic
-### With Scheduler support
-TODO: Add Jaeger pic
+<img width="1192" alt="image" src="https://user-images.githubusercontent.com/990120/199363953-13059a50-2e99-4867-b2c6-fd61151fe875.png">
 
+<img width="1192" alt="image" src="https://user-images.githubusercontent.com/990120/199363974-09b467de-cb2d-4442-a570-3fdbed63054f.png">
+
+### With Scheduler support
+<img width="1192" alt="image" src="https://user-images.githubusercontent.com/990120/199363696-961056fd-621f-4491-94cc-97eabd80306f.png">
 
 
 ## Trace Completable
