@@ -69,9 +69,9 @@ class TracedFlowable<T> extends Flowable<T> {
 
     @Override
     public void onError(@NonNull Throwable e) {
-      RxTracer.spanError(span, e);
-
       if (upstream != SubscriptionHelper.CANCELLED) {
+        RxTracer.spanError(span, e);
+
         downstream.onError(e);
       } else {
         RxJavaPlugins.onError(e);
@@ -80,9 +80,9 @@ class TracedFlowable<T> extends Flowable<T> {
 
     @Override
     public void onComplete() {
-      RxTracer.spanComplete(span);
-
       if (upstream != SubscriptionHelper.CANCELLED) {
+        RxTracer.spanComplete(span);
+
         downstream.onComplete();
       }
     }
@@ -97,9 +97,9 @@ class TracedFlowable<T> extends Flowable<T> {
       if (upstream != SubscriptionHelper.CANCELLED) {
         upstream.cancel();
         upstream = SubscriptionHelper.CANCELLED;
-      }
 
-      RxTracer.spanDispose(span);
+        RxTracer.spanDispose(span);
+      }
     }
   }
 }
