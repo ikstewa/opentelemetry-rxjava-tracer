@@ -215,7 +215,7 @@ class SingleTest extends RxTracerTestBase {
                 input -> {
                   final var span = tracer.spanBuilder("LongOperation." + input);
                   return Single.just(input)
-                      .delay(1, TimeUnit.SECONDS)
+                      .delay(10, TimeUnit.MILLISECONDS)
                       .compose(RxTracer.traceSingle(span));
                 })
             .firstElement()
