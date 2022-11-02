@@ -16,8 +16,8 @@
 package io.github.ikstewa.opentelemetry.rxjava3;
 
 import com.google.common.truth.Truth;
+import io.reactivex.rxjava3.core.Maybe;
 import io.reactivex.rxjava3.core.Observable;
-import io.reactivex.rxjava3.core.Single;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
@@ -27,7 +27,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 
-class SingleTest extends RxTracerTestBase {
+class MaybeTest extends RxTracerTestBase {
 
   private static final Logger LOG = LogManager.getLogger();
 
@@ -36,14 +36,14 @@ class SingleTest extends RxTracerTestBase {
   void simpleWrap() {
     final var span = tracer.spanBuilder("Subscribe");
 
-    Single.fromCallable(() -> "step1")
-        .compose(RxTracer.traceSingle(span))
+    Maybe.fromCallable(() -> "step1")
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans = """
-              Subscribe: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -53,18 +53,31 @@ class SingleTest extends RxTracerTestBase {
     final var span = tracer.spanBuilder("Subscribe");
 
     final var operation =
-        Single.fromCallable(
+        Maybe.fromCallable(
                 () -> {
                   LOG.trace("Calling step 1");
                   throw new RuntimeException("failed");
                 })
-            .compose(RxTracer.traceSingle(span))
+            .compose(RxTracer.traceMaybe(span))
             .ignoreElement();
     Assertions.assertThrows(RuntimeException.class, operation::blockingAwait);
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans = """
-              Subscribe: [status: ERROR, attributes: []]""";
+            Subscribe: [status: ERROR, attributes: []]""";
+    Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
+  }
+
+  @Test
+  @DisplayName("Empty maybe")
+  void emptyMaybe() {
+    final var span = tracer.spanBuilder("Subscribe");
+
+    Maybe.empty().compose(RxTracer.traceMaybe(span)).ignoreElement().blockingAwait();
+
+    LOG.debug("\r\n{}", printSpans());
+    final String expectedSpans = """
+            Subscribe: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -73,21 +86,21 @@ class SingleTest extends RxTracerTestBase {
   void nestedTraces() {
     final var span = tracer.spanBuilder("Subscribe");
 
-    Single.fromCallable(() -> "step1")
-        .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 1")))
-        .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 2")))
-        .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 3")))
-        .compose(RxTracer.traceSingle(span))
+    Maybe.fromCallable(() -> "step1")
+        .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 1")))
+        .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 2")))
+        .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 3")))
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Subscribe: [status: UNSET, attributes: []]
-                Step 3: [status: UNSET, attributes: []]
-                  Step 2: [status: UNSET, attributes: []]
-                    Step 1: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+              Step 3: [status: UNSET, attributes: []]
+                Step 2: [status: UNSET, attributes: []]
+                  Step 1: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -96,27 +109,27 @@ class SingleTest extends RxTracerTestBase {
   void mapNestsTrace() {
     final var span = tracer.spanBuilder("Subscribe");
 
-    Single.just("before")
-        .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 1")))
+    Maybe.just("before")
+        .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 1")))
         .map(
             a -> {
               final var mapSpan = tracer.spanBuilder("MapOperation").startSpan();
-              try (final var s = mapSpan.makeCurrent()) {
+              try (final var ignored = mapSpan.makeCurrent()) {
                 return "after";
               } finally {
                 mapSpan.end();
               }
             })
-        .compose(RxTracer.traceSingle(span))
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Subscribe: [status: UNSET, attributes: []]
-                Step 1: [status: UNSET, attributes: []]
-                MapOperation: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+              Step 1: [status: UNSET, attributes: []]
+              MapOperation: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -125,24 +138,25 @@ class SingleTest extends RxTracerTestBase {
     final var span = tracer.spanBuilder("Subscribe");
 
     final var step1 =
-        Single.fromCallable(() -> "step1")
-            .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 1")));
+        Maybe.fromCallable(() -> "step1")
+            .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 1")));
     final var step2 =
-        Single.fromCallable(() -> "step2")
-            .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 2")));
+        Maybe.fromCallable(() -> "step2")
+            .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 2")));
 
-    Single.concat(List.of(step1, step2))
+    Maybe.concat(List.of(step1, step2))
         .toList()
-        .compose(RxTracer.traceSingle(span))
+        .toMaybe()
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Subscribe: [status: UNSET, attributes: []]
-                Step 1: [status: UNSET, attributes: []]
-                Step 2: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+              Step 1: [status: UNSET, attributes: []]
+              Step 2: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -151,25 +165,26 @@ class SingleTest extends RxTracerTestBase {
     final var span = tracer.spanBuilder("Subscribe");
 
     final var step1 =
-        Single.fromCallable(() -> "step1")
-            .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 1")));
+        Maybe.fromCallable(() -> "step1")
+            .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 1")));
     final var step2 =
-        Single.fromCallable(() -> "step2")
-            .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 2")));
+        Maybe.fromCallable(() -> "step2")
+            .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 2")));
 
-    Single.concatEager(List.of(step1, step2))
+    Maybe.concatEager(List.of(step1, step2))
         .toList()
+        .toMaybe()
         .doOnSuccess(result -> span.setAttribute("result", result.toString()))
-        .compose(RxTracer.traceSingle(span))
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Subscribe: [status: UNSET, attributes: []]
-                Step 1: [status: UNSET, attributes: []]
-                Step 2: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+              Step 1: [status: UNSET, attributes: []]
+              Step 2: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -178,32 +193,32 @@ class SingleTest extends RxTracerTestBase {
     final var span = tracer.spanBuilder("Subscribe");
 
     final var step1 =
-        Single.fromCallable(() -> "step1")
-            .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 1")));
+        Maybe.fromCallable(() -> "step1")
+            .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 1")));
     final var step2 =
-        Single.fromCallable(() -> "step2")
-            .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 2")));
+        Maybe.fromCallable(() -> "step2")
+            .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 2")));
     final var step3 =
-        Single.fromCallable(() -> "step3")
-            .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 3")));
+        Maybe.fromCallable(() -> "step3")
+            .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 3")));
 
     step1
         .delay(10, TimeUnit.MILLISECONDS)
         .flatMap(__ -> step2)
-        .compose(RxTracer.traceSingle(tracer.spanBuilder("Parent 1")))
+        .compose(RxTracer.traceMaybe(tracer.spanBuilder("Parent 1")))
         .flatMap(__ -> step3)
-        .compose(RxTracer.traceSingle(span))
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Subscribe: [status: UNSET, attributes: []]
-                Parent 1: [status: UNSET, attributes: []]
-                  Step 1: [status: UNSET, attributes: []]
-                  Step 2: [status: UNSET, attributes: []]
-                Step 3: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+              Parent 1: [status: UNSET, attributes: []]
+                Step 1: [status: UNSET, attributes: []]
+                Step 2: [status: UNSET, attributes: []]
+              Step 3: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -211,12 +226,12 @@ class SingleTest extends RxTracerTestBase {
   void first_element() {
     final var result =
         Observable.range(1, 100)
-            .concatMapSingle(
+            .concatMapMaybe(
                 input -> {
                   final var span = tracer.spanBuilder("LongOperation." + input);
-                  return Single.just(input)
+                  return Maybe.just(input)
                       .delay(1, TimeUnit.SECONDS)
-                      .compose(RxTracer.traceSingle(span));
+                      .compose(RxTracer.traceMaybe(span));
                 })
             .firstElement()
             .blockingGet();
@@ -231,25 +246,25 @@ class SingleTest extends RxTracerTestBase {
   void traceInsideSubscribeActual() {
     final var span = tracer.spanBuilder("Subscribe");
 
-    Single.fromCallable(
+    Maybe.fromCallable(
             () -> {
               final var insideSpan = tracer.spanBuilder("Step 1").startSpan();
-              try (var s = insideSpan.makeCurrent()) {
+              try (var ignored = insideSpan.makeCurrent()) {
                 LOG.trace("Calling step 1");
                 return "step1";
               } finally {
                 insideSpan.end();
               }
             })
-        .compose(RxTracer.traceSingle(span))
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Subscribe: [status: UNSET, attributes: []]
-                Step 1: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+              Step 1: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -258,18 +273,18 @@ class SingleTest extends RxTracerTestBase {
   void subscribeOn() {
     final var span = tracer.spanBuilder("Subscribe");
 
-    Single.fromCallable(() -> "step1")
-        .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 1")))
+    Maybe.fromCallable(() -> "step1")
+        .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 1")))
         .subscribeOn(Schedulers.io())
-        .compose(RxTracer.traceSingle(span))
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Subscribe: [status: UNSET, attributes: []]
-                Step 1: [status: UNSET, attributes: []]""";
+            Subscribe: [status: UNSET, attributes: []]
+              Step 1: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 
@@ -282,18 +297,18 @@ class SingleTest extends RxTracerTestBase {
 
     final var span = tracer.spanBuilder("Subscribe");
 
-    Single.fromCallable(() -> "step1")
-        .compose(RxTracer.traceSingle(tracer.spanBuilder("Step 1")))
+    Maybe.fromCallable(() -> "step1")
+        .compose(RxTracer.traceMaybe(tracer.spanBuilder("Step 1")))
         .subscribeOn(Schedulers.io())
-        .compose(RxTracer.traceSingle(span))
+        .compose(RxTracer.traceMaybe(span))
         .ignoreElement()
         .blockingAwait();
 
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Step 1: [status: UNSET, attributes: []]
-              Subscribe: [status: UNSET, attributes: []]""";
+            Step 1: [status: UNSET, attributes: []]
+            Subscribe: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
 
     assembly.disable();
@@ -305,9 +320,9 @@ class SingleTest extends RxTracerTestBase {
     final var span = tracer.spanBuilder("Subscribe");
 
     final var disposable =
-        Single.fromCallable(() -> "step1")
+        Maybe.fromCallable(() -> "step1")
             .delay(1, TimeUnit.SECONDS)
-            .compose(RxTracer.traceSingle(span))
+            .compose(RxTracer.traceMaybe(span))
             .subscribe(
                 __ -> Assertions.fail("Did not expect to complete"),
                 err -> Assertions.fail("Did not expect to complete with error"));
@@ -318,7 +333,7 @@ class SingleTest extends RxTracerTestBase {
     LOG.debug("\r\n{}", printSpans());
     final String expectedSpans =
         """
-              Subscribe: [status: UNSET, attributes: [rxjava.canceled=true, span.cancelled=true]]""";
+            Subscribe: [status: UNSET, attributes: [rxjava.canceled=true, span.cancelled=true]]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
   }
 }

@@ -18,38 +18,38 @@ package io.github.ikstewa.opentelemetry.rxjava3;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.reactivex.rxjava3.annotations.NonNull;
-import io.reactivex.rxjava3.core.Single;
-import io.reactivex.rxjava3.core.SingleObserver;
-import io.reactivex.rxjava3.core.SingleSource;
+import io.reactivex.rxjava3.core.Maybe;
+import io.reactivex.rxjava3.core.MaybeObserver;
+import io.reactivex.rxjava3.core.MaybeSource;
 import io.reactivex.rxjava3.disposables.Disposable;
 import io.reactivex.rxjava3.internal.disposables.DisposableHelper;
 import java.util.concurrent.atomic.AtomicReference;
 
-class TracedSingle<T> extends Single<T> {
+public class TracedMaybe<T> extends Maybe<T> {
 
-  private final SingleSource<T> source;
+  private final MaybeSource<T> source;
   private final SpanBuilder spanBuilder;
 
-  public TracedSingle(SingleSource<T> source, SpanBuilder span) {
+  public TracedMaybe(MaybeSource<T> source, SpanBuilder span) {
     this.source = source;
     this.spanBuilder = span;
   }
 
   @Override
-  protected void subscribeActual(@NonNull SingleObserver<? super T> observer) {
+  protected void subscribeActual(@NonNull MaybeObserver<? super T> observer) {
     final var span = spanBuilder.startSpan();
     try (var ignored = span.makeCurrent()) {
-      source.subscribe(new TracedSingleObserver<>(observer, span));
+      source.subscribe(new TracedMaybeObserver<>(observer, span));
     }
   }
 
-  private static final class TracedSingleObserver<T> extends AtomicReference<Disposable>
-      implements SingleObserver<T>, Disposable {
+  private static final class TracedMaybeObserver<T> extends AtomicReference<Disposable>
+      implements MaybeObserver<T>, Disposable {
 
-    private final SingleObserver<T> actualObserver;
+    private final MaybeObserver<T> actualObserver;
     private final Span span;
 
-    public TracedSingleObserver(SingleObserver<T> observer, Span span) {
+    public TracedMaybeObserver(MaybeObserver<T> observer, Span span) {
       this.actualObserver = observer;
       this.span = span;
     }
@@ -75,6 +75,15 @@ class TracedSingle<T> extends Single<T> {
       RxTracer.spanError(span, e);
 
       actualObserver.onError(e);
+    }
+
+    @Override
+    public void onComplete() {
+      if (!isDisposed()) {
+        RxTracer.spanComplete(span);
+
+        actualObserver.onComplete();
+      }
     }
 
     @Override
