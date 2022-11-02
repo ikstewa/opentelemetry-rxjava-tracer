@@ -21,6 +21,8 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.StatusCode;
 import io.reactivex.rxjava3.core.CompletableSource;
 import io.reactivex.rxjava3.core.CompletableTransformer;
+import io.reactivex.rxjava3.core.MaybeSource;
+import io.reactivex.rxjava3.core.MaybeTransformer;
 import io.reactivex.rxjava3.core.SingleSource;
 import io.reactivex.rxjava3.core.SingleTransformer;
 
@@ -47,6 +49,14 @@ public final class RxTracer {
 
   public static <T> SingleTransformer<T, T> traceSingle(SpanBuilder span) {
     return upstream -> traceSingle(upstream, span);
+  }
+
+  public static <T> MaybeSource<T> traceMaybe(MaybeSource<T> upstream, SpanBuilder span) {
+    return new TracedMaybe<>(upstream, span);
+  }
+
+  public static <T> MaybeTransformer<T, T> traceMaybe(SpanBuilder span) {
+    return upstream -> traceMaybe(upstream, span);
   }
 
   // --------------------------------------------------------------------------------
