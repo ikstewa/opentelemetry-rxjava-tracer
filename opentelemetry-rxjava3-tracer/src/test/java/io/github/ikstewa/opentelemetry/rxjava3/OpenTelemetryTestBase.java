@@ -15,32 +15,58 @@
 //
 package io.github.ikstewa.opentelemetry.rxjava3;
 
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
+import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
+import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
 import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.sdk.trace.export.BatchSpanProcessor;
 import io.opentelemetry.sdk.trace.export.SimpleSpanProcessor;
+import io.opentelemetry.semconv.resource.attributes.ResourceAttributes;
 import java.util.Comparator;
 import java.util.List;
-import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.AfterEach;
 
 abstract class OpenTelemetryTestBase {
 
   protected final InMemorySpanExporter testExporter = InMemorySpanExporter.create();
-  protected final Tracer tracer =
-      SdkTracerProvider.builder()
-          .addSpanProcessor(SimpleSpanProcessor.create(testExporter))
-          .build()
-          .get(this.getClass().getCanonicalName());
+  protected final SdkTracerProvider tracerProvider;
+  protected final Tracer tracer;
 
-  @BeforeEach
-  void reset_exporter() {
-    testExporter.reset();
+  OpenTelemetryTestBase() {
+    final var resource =
+        Resource.getDefault()
+            .merge(
+                Resource.create(
+                    Attributes.of(
+                        ResourceAttributes.SERVICE_NAME, this.getClass().getSimpleName())));
+
+    final var tracerBuilder =
+        SdkTracerProvider.builder()
+            .setResource(resource)
+            .addSpanProcessor(SimpleSpanProcessor.create(testExporter));
+
+    if (Boolean.parseBoolean(System.getProperty("localJaeger"))) {
+      tracerBuilder.addSpanProcessor(
+          BatchSpanProcessor.builder(JaegerThriftSpanExporter.builder().build()).build());
+    }
+
+    tracerProvider = tracerBuilder.build();
+    tracer = tracerProvider.get(this.getClass().getCanonicalName());
+  }
+
+  @AfterEach
+  void flush_exporter() {
+    tracerProvider.close();
   }
 
   public List<SpanData> getSpans() {
-    return testExporter.getFinishedSpanItems();
+    return testExporter.getFinishedSpanItems().stream()
+        .sorted(Comparator.comparing(SpanData::getStartEpochNanos))
+        .toList();
   }
 
   public String printSpans() {
