@@ -21,12 +21,15 @@ import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.StatusCode;
 import io.reactivex.rxjava3.core.CompletableSource;
 import io.reactivex.rxjava3.core.CompletableTransformer;
+import io.reactivex.rxjava3.core.Flowable;
+import io.reactivex.rxjava3.core.FlowableTransformer;
 import io.reactivex.rxjava3.core.MaybeSource;
 import io.reactivex.rxjava3.core.MaybeTransformer;
 import io.reactivex.rxjava3.core.ObservableSource;
 import io.reactivex.rxjava3.core.ObservableTransformer;
 import io.reactivex.rxjava3.core.SingleSource;
 import io.reactivex.rxjava3.core.SingleTransformer;
+import org.reactivestreams.Publisher;
 
 public final class RxTracer {
 
@@ -68,6 +71,14 @@ public final class RxTracer {
 
   public static <T> ObservableTransformer<T, T> traceObservable(SpanBuilder span) {
     return upstream -> traceObservable(upstream, span);
+  }
+
+  public static <T> Publisher<T> traceFlowable(Flowable<T> upstream, SpanBuilder span) {
+    return new TracedFlowable<>(upstream, span);
+  }
+
+  public static <T> FlowableTransformer<T, T> traceFlowable(SpanBuilder span) {
+    return upstream -> traceFlowable(upstream, span);
   }
 
   // --------------------------------------------------------------------------------

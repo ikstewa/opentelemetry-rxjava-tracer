@@ -230,7 +230,7 @@ class MaybeTest extends RxTracerTestBase {
                 input -> {
                   final var span = tracer.spanBuilder("LongOperation." + input);
                   return Maybe.just(input)
-                      .delay(1, TimeUnit.SECONDS)
+                      .delay(10, TimeUnit.MILLISECONDS)
                       .compose(RxTracer.traceMaybe(span));
                 })
             .firstElement()
