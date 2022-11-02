@@ -135,7 +135,7 @@ class DocSamplesTest {
   @Test
   @DisplayName("Long running operation")
   void longRunningOperationTest() throws InterruptedException {
-    //RxTracingAssembly.builder().setEnableSchedulerPropagation(true).build().enable();
+    // RxTracingAssembly.builder().setEnableSchedulerPropagation(true).build().enable();
 
     final var span = tracer.spanBuilder("SubscribeToLongRunning");
 
@@ -148,5 +148,4 @@ class DocSamplesTest {
 
     latch.await();
   }
-
 }
