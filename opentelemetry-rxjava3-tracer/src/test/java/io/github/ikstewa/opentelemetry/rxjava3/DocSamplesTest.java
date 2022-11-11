@@ -19,7 +19,7 @@ import io.opentelemetry.api.OpenTelemetry;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.OpenTelemetrySdk;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -30,6 +30,7 @@ import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.util.concurrent.CountDownLatch;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.junit.jupiter.api.AfterAll;
 import org.junit.jupiter.api.BeforeAll;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.DisplayName;
@@ -42,14 +43,10 @@ import org.junit.jupiter.api.Test;
  *
  * <pre>
  * docker run -d --name jaeger \
- *   -p 5775:5775/udp \
- *   -p 6831:6831/udp \
- *   -p 6832:6832/udp \
- *   -p 5778:5778 \
+ *   -e COLLECTOR_OTLP_ENABLED=true \
  *   -p 16686:16686 \
- *   -p 14268:14268 \
- *   -p 9411:9411 \
- *   jaegertracing/all-in-one:1.6
+ *   -p 4317:4317 \
+ *   jaegertracing/all-in-one:1.39
  * </pre>
  */
 @Disabled
@@ -57,6 +54,7 @@ class DocSamplesTest {
 
   private static final Logger LOG = LogManager.getLogger();
 
+  private static SdkTracerProvider sdkTracerProvider;
   private static Tracer tracer;
 
   @BeforeAll
@@ -68,10 +66,9 @@ class DocSamplesTest {
                     Attributes.of(
                         ResourceAttributes.SERVICE_NAME, DocSamplesTest.class.getSimpleName())));
 
-    SdkTracerProvider sdkTracerProvider =
+    sdkTracerProvider =
         SdkTracerProvider.builder()
-            .addSpanProcessor(
-                SimpleSpanProcessor.create(JaegerThriftSpanExporter.builder().build()))
+            .addSpanProcessor(SimpleSpanProcessor.create(OtlpGrpcSpanExporter.builder().build()))
             .setResource(resource)
             .build();
 
@@ -79,6 +76,11 @@ class DocSamplesTest {
         OpenTelemetrySdk.builder().setTracerProvider(sdkTracerProvider).buildAndRegisterGlobal();
 
     tracer = openTelemetry.getTracer("instrumentation-library-name", "1.0.0");
+  }
+
+  @AfterAll
+  static void flush_exporter() {
+    sdkTracerProvider.close();
   }
 
   @Test
