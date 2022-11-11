@@ -18,7 +18,7 @@ package io.github.ikstewa.opentelemetry.rxjava3;
 import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.SpanContext;
 import io.opentelemetry.api.trace.Tracer;
-import io.opentelemetry.exporter.jaeger.thrift.JaegerThriftSpanExporter;
+import io.opentelemetry.exporter.otlp.trace.OtlpGrpcSpanExporter;
 import io.opentelemetry.sdk.resources.Resource;
 import io.opentelemetry.sdk.testing.exporter.InMemorySpanExporter;
 import io.opentelemetry.sdk.trace.SdkTracerProvider;
@@ -51,7 +51,7 @@ abstract class OpenTelemetryTestBase {
 
     if (Boolean.parseBoolean(System.getProperty("localJaeger"))) {
       tracerBuilder.addSpanProcessor(
-          BatchSpanProcessor.builder(JaegerThriftSpanExporter.builder().build()).build());
+          BatchSpanProcessor.builder(OtlpGrpcSpanExporter.builder().build()).build());
     }
 
     tracerProvider = tracerBuilder.build();
