@@ -37,7 +37,7 @@ class TracedObservable<T> extends Observable<T> {
 
   @Override
   protected void subscribeActual(@NonNull Observer<? super T> observer) {
-    final var span = spanBuilder.startSpan();
+    final var span = RxTracer.spanSubscribe(spanBuilder);
     try (var ignored = span.makeCurrent()) {
       source.subscribe(new TracedObserver<>(observer, span));
     }

@@ -16,6 +16,7 @@
 package io.github.ikstewa.opentelemetry.rxjava3;
 
 import com.google.common.truth.Truth;
+import com.google.common.truth.Truth8;
 import io.reactivex.rxjava3.core.Flowable;
 import io.reactivex.rxjava3.schedulers.Schedulers;
 import java.util.List;
@@ -266,6 +267,12 @@ class FlowableTest extends RxTracerTestBase {
                             Subscribe: [status: UNSET, attributes: []]
                               Step 1: [status: UNSET, attributes: []]""";
     Truth.assertThat(printSpans()).isEqualTo(expectedSpans);
+
+    // Validate onSubscribe event
+    final var parentThread = findSubscribeThread("Subscribe");
+    final var innerThread = findSubscribeThread("Step 1");
+    Truth8.assertThat(parentThread).isPresent();
+    Truth8.assertThat(parentThread).isNotEqualTo(innerThread);
   }
 
   @Test

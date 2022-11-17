@@ -15,6 +15,10 @@
 //
 package io.github.ikstewa.opentelemetry.rxjava2;
 
+import io.opentelemetry.sdk.trace.data.EventData;
+import io.opentelemetry.sdk.trace.data.SpanData;
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
+import java.util.Optional;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 
@@ -31,6 +35,21 @@ abstract class RxTracerTestBase extends OpenTelemetryTestBase {
   @AfterEach
   void cleanup_rxassembly() {
     ASSEMBLY.disable();
+  }
+
+  Optional<SpanData> findSpan(String spanName) {
+    return getSpans().stream().filter(s -> s.getName().equals(spanName)).findFirst();
+  }
+
+  Optional<EventData> findSubscribeEvent(String spanName) {
+    return findSpan(spanName)
+        .flatMap(
+            s -> s.getEvents().stream().filter(e -> e.getName().equals("onSubscribe")).findFirst());
+  }
+
+  Optional<Long> findSubscribeThread(String spanName) {
+    return findSubscribeEvent(spanName)
+        .map(e -> e.getAttributes().get(SemanticAttributes.THREAD_ID));
   }
 
   abstract void simpleWrap();
