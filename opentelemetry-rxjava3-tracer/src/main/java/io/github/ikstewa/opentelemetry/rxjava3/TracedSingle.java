@@ -37,7 +37,7 @@ class TracedSingle<T> extends Single<T> {
 
   @Override
   protected void subscribeActual(@NonNull SingleObserver<? super T> observer) {
-    final var span = spanBuilder.startSpan();
+    final var span = RxTracer.spanSubscribe(spanBuilder);
     try (var ignored = span.makeCurrent()) {
       source.subscribe(new TracedSingleObserver<>(observer, span));
     }

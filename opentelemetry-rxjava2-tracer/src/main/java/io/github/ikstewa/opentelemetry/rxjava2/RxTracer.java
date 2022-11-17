@@ -16,9 +16,11 @@
 package io.github.ikstewa.opentelemetry.rxjava2;
 
 import io.opentelemetry.api.common.AttributeKey;
+import io.opentelemetry.api.common.Attributes;
 import io.opentelemetry.api.trace.Span;
 import io.opentelemetry.api.trace.SpanBuilder;
 import io.opentelemetry.api.trace.StatusCode;
+import io.opentelemetry.semconv.trace.attributes.SemanticAttributes;
 import io.reactivex.CompletableSource;
 import io.reactivex.CompletableTransformer;
 import io.reactivex.Flowable;
@@ -83,6 +85,19 @@ public final class RxTracer {
 
   // --------------------------------------------------------------------------------
   // Helper methods
+
+  static Span spanSubscribe(SpanBuilder spanBuilder) {
+    final var span = spanBuilder.startSpan();
+
+    // Add event for subscription
+    span.addEvent(
+        "onSubscribe",
+        Attributes.of(
+            SemanticAttributes.THREAD_ID, Thread.currentThread().getId(),
+            SemanticAttributes.THREAD_NAME, Thread.currentThread().getName()));
+
+    return span;
+  }
 
   static void spanComplete(Span span) {
     span.end();

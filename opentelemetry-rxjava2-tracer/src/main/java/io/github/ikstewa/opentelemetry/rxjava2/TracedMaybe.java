@@ -37,7 +37,7 @@ public class TracedMaybe<T> extends Maybe<T> {
 
   @Override
   protected void subscribeActual(MaybeObserver<? super T> observer) {
-    final var span = spanBuilder.startSpan();
+    final var span = RxTracer.spanSubscribe(spanBuilder);
     try (var ignored = span.makeCurrent()) {
       source.subscribe(new TracedMaybeObserver<>(observer, span));
     }

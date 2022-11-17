@@ -37,7 +37,7 @@ class TracedCompletable extends Completable {
 
   @Override
   protected void subscribeActual(@NonNull CompletableObserver observer) {
-    final var span = spanBuilder.startSpan();
+    final var span = RxTracer.spanSubscribe(spanBuilder);
     try (var ignored = span.makeCurrent()) {
       source.subscribe(new TracedCompletableObserver(observer, span));
     }
