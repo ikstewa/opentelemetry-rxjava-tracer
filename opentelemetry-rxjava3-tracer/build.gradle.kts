@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     api(platform("org.apache.logging.log4j:log4j-bom:2.19.0"))
-    api(platform("io.opentelemetry:opentelemetry-bom:1.20.1"))
+    api(platform("io.opentelemetry:opentelemetry-bom:1.21.0"))
     api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.20.2-alpha"))
 
     api("io.opentelemetry:opentelemetry-api")
