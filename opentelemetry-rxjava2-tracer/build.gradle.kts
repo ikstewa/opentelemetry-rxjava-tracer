@@ -3,7 +3,7 @@ plugins {
     jacoco
     `maven-publish`
     signing
-    id("com.diffplug.spotless") version "6.13.0"
+    id("com.diffplug.spotless") version "6.14.0"
 }
 
 repositories {
