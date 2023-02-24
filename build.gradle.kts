@@ -1,7 +1,7 @@
 import net.researchgate.release.ReleaseExtension
 
 plugins {
-    id("io.github.gradle-nexus.publish-plugin") version "1.1.0"
+    id("io.github.gradle-nexus.publish-plugin") version "1.2.0"
     id("net.researchgate.release") version "3.0.2"
 }
 
