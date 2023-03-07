@@ -32,6 +32,7 @@ class FlowableTest extends RxTracerTestBase {
   private static final Logger LOG = LogManager.getLogger();
 
   @Test
+  @Override
   @DisplayName("Simple wrap")
   void simpleWrap() {
     final var span = tracer.spanBuilder("Subscribe");
@@ -45,6 +46,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   @DisplayName("Simple wrap error")
   void simpleWrapError() {
     final var span = tracer.spanBuilder("Subscribe");
@@ -74,6 +76,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   @DisplayName("Nested traces")
   void nestedTraces() {
     final var span = tracer.spanBuilder("Subscribe");
@@ -97,6 +100,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   @DisplayName("Map nests trace")
   void mapNestsTrace() {
     final var span = tracer.spanBuilder("Subscribe");
@@ -127,6 +131,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   void concat() {
     final var span = tracer.spanBuilder("Subscribe");
 
@@ -150,6 +155,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   void concat_eager() {
     final var span = tracer.spanBuilder("Subscribe");
 
@@ -173,6 +179,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   void with_delays() {
     final var span = tracer.spanBuilder("Subscribe");
 
@@ -204,6 +211,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   void first_element() {
     final var result =
         Flowable.range(1, 100)
@@ -223,6 +231,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   @DisplayName("Trace inside subscribe actual")
   void traceInsideSubscribeActual() {
     final var span = tracer.spanBuilder("Subscribe");
@@ -250,6 +259,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   @DisplayName("SubscribeOn")
   void subscribeOn() {
     final var span = tracer.spanBuilder("Subscribe");
@@ -276,6 +286,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   @DisplayName("SubscribeOn no scheduler")
   void subscribeOnNoScheduler() {
     // Disabling the scheduler feature does not parent spans
@@ -302,6 +313,7 @@ class FlowableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   @DisplayName("Spans are handled with dispose")
   void spansAreHandledWithDispose() {
     final var span = tracer.spanBuilder("Subscribe");
