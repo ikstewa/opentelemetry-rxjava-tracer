@@ -2,7 +2,7 @@ name: 'Dependency Review'
 on: [pull_request]
 
 permissions:
-  contents: read
+  contents: write # The Dependency Submission API requires write permission
   pull-requests: write
 
 jobs:
