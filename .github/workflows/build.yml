@@ -27,6 +27,11 @@ jobs:
         with:
           arguments: build --stacktrace
 
+      - name: Upload dependency snapshot
+        uses: gradle/gradle-build-action@v2.4.0
+        with:
+          arguments: uploadGithubDependenciesSnapshot
+
       - name: Upload to Codecov
         uses: codecov/codecov-action@v3
         with:
