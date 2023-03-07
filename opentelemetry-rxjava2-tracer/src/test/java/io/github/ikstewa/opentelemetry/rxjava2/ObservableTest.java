@@ -103,6 +103,7 @@ class ObservableTest extends RxTracerTestBase {
   }
 
   @Test
+  @Override
   @DisplayName("Map nests trace")
   void mapNestsTrace() {
     final var span = tracer.spanBuilder("Subscribe");
