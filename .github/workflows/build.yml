@@ -14,8 +14,10 @@ jobs:
 
     runs-on: ubuntu-latest
 
-    permissions: # The Dependency Submission API requires write permission
-      contents: write
+    # The Dependency Submission API requires write permission
+    permissions: write-all
+    #permissions: 
+    #  contents: write
 
     steps:
       - uses: actions/checkout@v3
