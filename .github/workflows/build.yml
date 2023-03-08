@@ -9,15 +9,14 @@ on:
   pull_request:
     branches: [ master ]
 
+# The API requires write permission on the repository to submit dependencies
+permissions:
+  contents: write
+
 jobs:
   build:
 
     runs-on: ubuntu-latest
-
-    # The Dependency Submission API requires write permission
-    permissions: write-all
-    #permissions: 
-    #  contents: write
 
     steps:
       - uses: actions/checkout@v3
