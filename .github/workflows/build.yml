@@ -9,6 +9,10 @@ on:
   pull_request:
     branches: [ master ]
 
+# The API requires write permission on the repository to submit dependencies
+permissions:
+  contents: write
+
 jobs:
   build:
 
@@ -26,6 +30,9 @@ jobs:
         uses: gradle/gradle-build-action@v2.4.0
         with:
           arguments: build --stacktrace
+
+      - name: Upload dependency snapshot
+        run: ./gradlew uploadGithubDependenciesSnapshot --debug
 
       - name: Upload to Codecov
         uses: codecov/codecov-action@v3
