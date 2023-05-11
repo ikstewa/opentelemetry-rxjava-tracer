@@ -13,7 +13,7 @@ repositories {
 
 dependencies {
     api(platform("org.apache.logging.log4j:log4j-bom:2.20.0"))
-    api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.24.0-alpha"))
+    api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.26.0-alpha"))
 
     api("io.opentelemetry:opentelemetry-api")
     api("io.reactivex.rxjava2:rxjava:2.2.21")
