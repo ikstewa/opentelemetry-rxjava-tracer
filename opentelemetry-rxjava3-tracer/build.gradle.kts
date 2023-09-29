@@ -16,7 +16,7 @@ dependencies {
     api(platform("io.opentelemetry.instrumentation:opentelemetry-instrumentation-bom-alpha:1.28.0-alpha"))
 
     api("io.opentelemetry:opentelemetry-api")
-    api("io.reactivex.rxjava3:rxjava:3.1.6")
+    api("io.reactivex.rxjava3:rxjava:3.1.8")
     implementation("com.google.code.findbugs:jsr305:3.0.2")
     implementation("io.opentelemetry.instrumentation:opentelemetry-rxjava-3.1.1")
 
