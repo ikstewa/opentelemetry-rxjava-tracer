@@ -30,7 +30,7 @@ dependencies {
     testImplementation("io.opentelemetry:opentelemetry-sdk")
     testImplementation("io.opentelemetry:opentelemetry-sdk-testing")
     testImplementation("io.opentelemetry:opentelemetry-exporter-otlp")
-    testImplementation("com.google.truth.extensions:truth-java8-extension:1.1.5")
+    testImplementation("com.google.truth.extensions:truth-java8-extension:1.4.2")
     testImplementation("com.google.truth:truth:1.1.5")
 }
 
